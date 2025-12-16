@@ -1,0 +1,30 @@
+# Node modules
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Test folders
+tests
+coverage
+
+# Environment files
+.env
+.env.test
+
+# Git
+.git
+.gitignore
+
+# Docker files (optional if not needed in image)
+Dockerfile*
+docker-compose.yml
+
+# IDE/editor files
+.vscode
+.idea
+*.swp
+*.swo
+
+# Build outputs
+dist
+build

@@ -1,74 +1,85 @@
-# Getting Started with Create React App
+# Dental Clinic Management System
 
+A full-stack web application for managing a dental clinic, including appointment scheduling, user management, services, and invoices.
 
-## Available Scripts
+## Tech Stack
+- **Backend**: Node.js, Express, MySQL, JWT, bcryptjs
+- **Frontend**: React, Material-UI, Axios
+- **Database**: MySQL
+- **Containerization**: Docker & Docker Compose
+- **Testing**: Jest & Supertest
 
-In the project directory, you can run:
+## Running with Docker
 
-### `npm start`
+```bash
+docker-compose up --build
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+This will start the MySQL database, backend API on port 5001, and frontend on port 3000.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Running Locally
 
-### `npm test`
+### Backend
+```bash
+cd BE
+npm install
+npm run dev
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Frontend
+```bash
+cd FE
+npm install
+npm start
+```
 
-### `npm run build`
+## Running Tests
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Backend Tests
+```bash
+cd BE
+npm test
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Environment Variables
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Create a `.env` file in the `BE` directory with the following variables:
 
-### `npm run eject`
+```
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=root
+DB_NAME=dental_clinic
+JWT_SECRET=your_jwt_secret_key
+CORS_ORIGIN=http://localhost:3000
+NODE_ENV=development
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Important Endpoints
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Authentication
+- `POST /api/auth/register` - Register a new user
+- `POST /api/auth/login` - Login user
+- `GET /api/auth/profile` - Get user profile (authenticated)
+- `PUT /api/auth/profile` - Update user profile (authenticated)
+- `GET /api/auth/overview` - Get user overview (authenticated)
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Services
+- `GET /api/services` - Get all services
+- `GET /api/services/:id` - Get service by ID
+- `GET /api/services/category/:category` - Get services by category
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Appointments
+- `GET /api/appointments` - Get user appointments (authenticated)
+- `POST /api/appointments` - Create new appointment (authenticated)
+- `PUT /api/appointments/:id` - Update appointment (authenticated)
+- `DELETE /api/appointments/:id` - Cancel appointment (authenticated)
 
-## Learn More
+### Invoices
+- `GET /api/invoices/my-invoices` - Get user invoices (authenticated)
+- `GET /api/invoices/:id` - Get invoice by ID (authenticated)
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-
-Backend
-//npm run dev
- Frontend
- npm start
+### Health Check
+- `GET /health` - Health check
+- `GET /api/version` - API version
