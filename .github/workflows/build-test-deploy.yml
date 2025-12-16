@@ -2,29 +2,14 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
 
 jobs:
-# 1️⃣ Checkout & Setup
-  checkout-setup:
-    name: Checkout & Setup
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
-
-# 2️⃣ Backend Tests
+# 1️⃣ Tests
   test:
-    name: Run Backend Tests
+    name: Backend Tests
     runs-on: ubuntu-latest
-    needs: checkout-setup
 
     services:
       mysql:
@@ -41,19 +26,17 @@ jobs:
           --health-retries=5
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: 20
 
-      - name: Install backend dependencies
+      - name: Install backend deps
         run: npm install
         working-directory: BE
 
-      - name: Run backend tests
+      - name: Run tests
         run: npm test
         working-directory: BE
         env:
@@ -65,16 +48,17 @@ jobs:
           DB_NAME: dental_clinic_test
           JWT_SECRET: testsecret
 
-# 3️⃣ Build + Security Scan
-  build:
-    name: Build & Scan Docker Images
+# 2️⃣ Build + Scan + Push
+  build-scan-push:
+    name: Build, Scan & Push Images
     runs-on: ubuntu-latest
     needs: test
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    if: github.ref == 'refs/heads/main'
 
-      - name: Log in to GitHub Container Registry
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Login to GHCR
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
@@ -82,80 +66,32 @@ jobs:
           password: ${{ secrets.GHCR_TOKEN }}
 
       # ---- Backend ----
-      - name: Build backend image (local)
-        run: docker build -t dentalclinic-backend:latest ./BE
+      - name: Build backend image
+        run: |
+          docker build -t ghcr.io/${{ github.actor }}/dentalclinic-backend:latest ./BE
+          docker tag ghcr.io/${{ github.actor }}/dentalclinic-backend:latest \
+                     ghcr.io/${{ github.actor }}/dentalclinic-backend:${{ github.sha }}
 
-      - name: Security scan backend image (Trivy)
+      - name: Trivy scan backend
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: dentalclinic-backend:latest
+          image-ref: ghcr.io/${{ github.actor }}/dentalclinic-backend:latest
           severity: CRITICAL
           exit-code: 1
-
-      - name: Tag backend image
-        run: |
-          docker tag dentalclinic-backend:latest ghcr.io/${{ github.actor }}/dentalclinic-backend:latest
-          docker tag dentalclinic-backend:latest ghcr.io/${{ github.actor }}/dentalclinic-backend:${{ github.sha }}
-
-      # ---- Frontend ----
-      - name: Build frontend image (local)
-        run: docker build -t dentalclinic-frontend:latest ./FE
-
-      - name: Tag frontend image
-        run: |
-          docker tag dentalclinic-frontend:latest ghcr.io/${{ github.actor }}/dentalclinic-frontend:latest
-          docker tag dentalclinic-frontend:latest ghcr.io/${{ github.actor }}/dentalclinic-frontend:${{ github.sha }}
-
-# 4️⃣ Push Images
-  push:
-    name: Push Images to GHCR
-    runs-on: ubuntu-latest
-    needs: build
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_TOKEN }}
 
       - name: Push backend image
         run: |
           docker push ghcr.io/${{ github.actor }}/dentalclinic-backend:latest
           docker push ghcr.io/${{ github.actor }}/dentalclinic-backend:${{ github.sha }}
 
+      # ---- Frontend ----
+      - name: Build frontend image
+        run: |
+          docker build -t ghcr.io/${{ github.actor }}/dentalclinic-frontend:latest ./FE
+          docker tag ghcr.io/${{ github.actor }}/dentalclinic-frontend:latest \
+                     ghcr.io/${{ github.actor }}/dentalclinic-frontend:${{ github.sha }}
+
       - name: Push frontend image
         run: |
           docker push ghcr.io/${{ github.actor }}/dentalclinic-frontend:latest
           docker push ghcr.io/${{ github.actor }}/dentalclinic-frontend:${{ github.sha }}
-
-# 5️⃣ Deploy to EKS
-  deploy:
-    name: Deploy to EKS
-    runs-on: ubuntu-latest
-    needs: push
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: v1.27.0
-
-      - name: Deploy to EKS
-        run: |
-          kubectl apply -f k8s/
-          kubectl rollout status deployment/dentalclinic-backend
-
-      - name: Show deployed app info
-        run: kubectl get all
