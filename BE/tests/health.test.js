@@ -1,5 +1,6 @@
 const request = require('supertest');
 const app = require('../src/app');
+const { getPool } = require('../db');
 
 describe('Backend required endpoints', () => {
   it('GET /health', async () => {
@@ -12,4 +13,9 @@ describe('Backend required endpoints', () => {
     const res = await request(app).get('/api/version');
     expect(res.body).toHaveProperty('version');
   });
+});
+
+afterAll(async () => {
+  const pool = await getPool();
+  await pool.end();
 });

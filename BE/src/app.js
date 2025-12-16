@@ -1,4 +1,7 @@
-require('dotenv').config();
+require('dotenv').config({
+  path: process.env.NODE_ENV === 'test' ? '.env.test' : '.env'
+});
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -16,10 +19,10 @@ const app = express();
 /* =========================
    Database initialization
 ========================= */
-getPool().catch(err => {
-  console.error('Failed to initialize database:', err);
-  process.exit(1);
-});
+// getPool().catch(err => {
+//   console.error('Failed to initialize database:', err);
+// //   process.exit(1);
+// });
 
 /* =========================
    CORS configuration
