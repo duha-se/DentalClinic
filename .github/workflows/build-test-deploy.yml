@@ -13,7 +13,7 @@ jobs:
 
     services:
       mysql:
-        image: mysql:8
+        image: ghcr.io/mysql/mysql-server:8.0
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: dental_clinic_test
