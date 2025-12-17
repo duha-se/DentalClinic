@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dentalclinic-config
+  namespace: k8s-duha
+data:
+  APP_ENV: production
+  LOG_LEVEL: info

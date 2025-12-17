@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dentalclinic-backend
+  namespace: k8s-duha
+  labels:
+    app: dentalclinic
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: dentalclinic
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: dentalclinic
+    spec:
+      imagePullSecrets:
+        - name: ghcr-secret 
+      containers:
+        - name: backend
+          image: ghcr.io/duha-se/dentalclinic-backend:latest
+          ports:
+            - containerPort: 5001
+          envFrom:
+            - configMapRef:
+                name: dentalclinic-config
+            - secretRef:
+                name: dentalclinic-secrets
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5001
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5001
+            initialDelaySeconds: 15
+            periodSeconds: 20
+      restartPolicy: Always
