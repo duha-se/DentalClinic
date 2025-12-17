@@ -29,3 +29,6 @@ yarn-error.log*
 /FE/dc/node_modules/
 /BE/server.log
 server.log
+
+/BE/.env
+/BE/.env.test
