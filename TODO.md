@@ -1,1 +1,0 @@
-- [x] Update FE/README.md with project idea, tech stack, Docker run instructions, test run instructions, environment variables, and important endpoints
