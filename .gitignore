@@ -32,3 +32,4 @@ server.log
 
 /BE/.env
 /BE/.env.test
+/k8s/secret.yaml
