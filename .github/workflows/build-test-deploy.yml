@@ -91,6 +91,13 @@ jobs:
           docker tag ghcr.io/${{ github.actor }}/dentalclinic-frontend:latest \
                      ghcr.io/${{ github.actor }}/dentalclinic-frontend:${{ github.sha }}
 
+      - name: Trivy scan frontend
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ghcr.io/${{ github.actor }}/dentalclinic-frontend:latest
+          severity: CRITICAL
+          exit-code: 1
+
       - name: Push frontend image
         run: |
           docker push ghcr.io/${{ github.actor }}/dentalclinic-frontend:latest
